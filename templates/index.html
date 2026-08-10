@@ -1,0 +1,948 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Inventory Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        h1 {
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .stat-card.danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+        
+        .stat-card.info {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .section-header h2 {
+            color: #333;
+            font-size: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #f5576c;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+        
+        .btn-info {
+            background: #4facfe;
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+        
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px;
+            background: #edf2f7;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        
+        .stock-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .stock-healthy {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .stock-low {
+            background: #fefcbf;
+            color: #744210;
+        }
+        
+        .stock-critical {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .stock-overstocked {
+            background: #bee3f8;
+            color: #2a4365;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .predict-result {
+            margin-top: 10px;
+            padding: 15px;
+            background: #ebf8ff;
+            border-radius: 8px;
+            border-left: 4px solid #3182ce;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons .btn {
+            font-size: 11px;
+            padding: 4px 10px;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .toast-success {
+            background: #48bb78;
+        }
+        
+        .toast-error {
+            background: #f5576c;
+        }
+        
+        .toast-info {
+            background: #4facfe;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .input-group input, .input-group select {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .quick-actions {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📊 ML Inventory Management</h1>
+                <p class="subtitle">Machine Learning-powered stock prediction and management</p>
+            </div>
+            <div class="quick-actions">
+                <button class="btn btn-primary" onclick="openAddProductModal()">➕ Add Product</button>
+                <button class="btn btn-success" onclick="openRestockModal()">📦 Restock</button>
+                <button class="btn btn-info" onclick="refreshData()">🔄 Refresh</button>
+            </div>
+        </div>
+        
+        <!-- Dashboard Stats -->
+        <div class="dashboard-grid" id="dashboardStats">
+            <div class="stat-card">
+                <h3>📦 Total Products</h3>
+                <div class="number" id="totalProducts">-</div>
+            </div>
+            <div class="stat-card danger">
+                <h3>⚠️ Low Stock</h3>
+                <div class="number" id="lowStockItems">-</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>🔴 Critical</h3>
+                <div class="number" id="criticalStockItems">-</div>
+            </div>
+            <div class="stat-card success">
+                <h3>💰 Inventory Value</h3>
+                <div class="number" id="inventoryValue">$0</div>
+            </div>
+            <div class="stat-card info">
+                <h3>🧠 ML Models</h3>
+                <div class="number" id="mlPredictions">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>📈 Today's Revenue</h3>
+                <div class="number" id="todayRevenue">$0</div>
+            </div>
+        </div>
+        
+        <!-- Products Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>📦 Product Inventory</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Category</th>
+                            <th>Stock</th>
+                            <th>Reorder Level</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTable">
+                        <tr><td colspan="8" class="loading">Loading products...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Sales Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2>💰 Record Sale</h2>
+            </div>
+            <div class="input-group">
+                <select id="saleProduct" style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 5px; flex: 1; min-width: 150px;">
+                    <option value="">Select Product</option>
+                </select>
+                <input type="number" id="saleQuantity" placeholder="Quantity" style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 5px; width: 120px;">
+                <input type="text" id="customerId" placeholder="Customer ID (optional)" style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 5px; width: 150px;">
+                <button class="btn btn-success" onclick="recordSale()">Record Sale</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="modal">
+        <div class="modal-content">
+            <h2>➕ Add New Product</h2>
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label>Product Name *</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label>SKU *</label>
+                    <input type="text" id="productSku" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="productCategory">
+                        <option value="General">General</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Food">Food</option>
+                        <option value="Books">Books</option>
+                        <option value="Furniture">Furniture</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Initial Stock</label>
+                    <input type="number" id="productStock" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Reorder Level</label>
+                    <input type="number" id="productReorder" value="10" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Minimum Stock</label>
+                    <input type="number" id="productMinStock" value="5" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Maximum Stock</label>
+                    <input type="number" id="productMaxStock" value="100" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Price ($)</label>
+                    <input type="number" id="productPrice" value="0" step="0.01" min="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeAddProductModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Restock Modal -->
+    <div id="restockModal" class="modal">
+        <div class="modal-content">
+            <h2>📦 Restock Product</h2>
+            <form id="restockForm">
+                <div class="form-group">
+                    <label>Product *</label>
+                    <select id="restockProduct" required>
+                        <option value="">Select Product</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Quantity to Add *</label>
+                    <input type="number" id="restockQuantity" required min="1">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <input type="text" id="restockNotes" placeholder="Optional notes">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-danger" onclick="closeRestockModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">Restock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Prediction Modal -->
+    <div id="predictionModal" class="modal">
+        <div class="modal-content">
+            <h2>🔮 Stock Prediction</h2>
+            <div id="predictionResult">
+                <div class="loading">Loading prediction...</div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closePredictionModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_URL}/analytics/dashboard`);
+                const data = await response.json();
+                
+                document.getElementById('totalProducts').textContent = data.total_products || 0;
+                document.getElementById('lowStockItems').textContent = data.low_stock_items || 0;
+                document.getElementById('criticalStockItems').textContent = data.critical_stock_items || 0;
+                document.getElementById('inventoryValue').textContent = `$${data.total_inventory_value?.toFixed(2) || '0.00'}`;
+                document.getElementById('mlPredictions').textContent = data.ml_models_count || 0;
+                document.getElementById('todayRevenue').textContent = `$${data.today_revenue?.toFixed(2) || '0.00'}`;
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+        
+        // Get products
+        async function getProducts() {
+            try {
+                const response = await fetch(`${API_URL}/products`);
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                return [];
+            }
+        }
+        
+        // Load products table
+        async function loadProducts() {
+            const products = await getProducts();
+            const tbody = document.getElementById('productsTable');
+            
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #666; padding: 30px;">No products added yet. Click "Add Product" to get started!</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = products.map(p => {
+                const statusMap = {
+                    'critical': 'stock-critical',
+                    'low': 'stock-low',
+                    'healthy': 'stock-healthy',
+                    'overstocked': 'stock-overstocked'
+                };
+                const statusText = {
+                    'critical': '🔴 Critical',
+                    'low': '🟡 Low Stock',
+                    'healthy': '✅ Healthy',
+                    'overstocked': '📦 Overstocked'
+                };
+                const statusClass = statusMap[p.stock_status] || 'stock-healthy';
+                
+                return `
+                    <tr>
+                        <td><strong>${p.name}</strong></td>
+                        <td>${p.sku}</td>
+                        <td>${p.category || 'General'}</td>
+                        <td><strong>${p.current_stock}</strong></td>
+                        <td>${p.reorder_level}</td>
+                        <td>$${p.price.toFixed(2)}</td>
+                        <td><span class="stock-badge ${statusClass}">${statusText[p.stock_status] || 'Healthy'}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary btn-sm" onclick="predictStock(${p.id})">🔮 Predict</button>
+                                <button class="btn btn-warning btn-sm" onclick="trainModel(${p.id})">🧠 Train</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Update sale and restock dropdowns
+            const saleSelect = document.getElementById('saleProduct');
+            const restockSelect = document.getElementById('restockProduct');
+            const options = products.map(p => 
+                `<option value="${p.id}">${p.name} (Stock: ${p.current_stock})</option>`
+            ).join('');
+            
+            saleSelect.innerHTML = '<option value="">Select Product</option>' + options;
+            restockSelect.innerHTML = '<option value="">Select Product</option>' + options;
+        }
+        
+        // Add product
+        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const product = {
+                name: document.getElementById('productName').value,
+                sku: document.getElementById('productSku').value,
+                category: document.getElementById('productCategory').value,
+                current_stock: parseInt(document.getElementById('productStock').value) || 0,
+                reorder_level: parseInt(document.getElementById('productReorder').value) || 10,
+                min_stock: parseInt(document.getElementById('productMinStock').value) || 5,
+                max_stock: parseInt(document.getElementById('productMaxStock').value) || 100,
+                price: parseFloat(document.getElementById('productPrice').value) || 0
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/products`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(product)
+                });
+                
+                if (response.ok) {
+                    closeAddProductModal();
+                    await loadProducts();
+                    await loadDashboard();
+                    showToast('Product added successfully!', 'success');
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Error adding product', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding product:', error);
+                showToast('Error adding product', 'error');
+            }
+        });
+        
+        // Restock product
+        document.getElementById('restockForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                product_id: parseInt(document.getElementById('restockProduct').value),
+                quantity: parseInt(document.getElementById('restockQuantity').value),
+                notes: document.getElementById('restockNotes').value
+            };
+            
+            if (!data.product_id || !data.quantity) {
+                showToast('Please select a product and enter quantity', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/restock`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    closeRestockModal();
+                    await loadProducts();
+                    await loadDashboard();
+                    showToast(`Restocked ${data.quantity} units of ${result.product_name}`, 'success');
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Error restocking', 'error');
+                }
+            } catch (error) {
+                console.error('Error restocking:', error);
+                showToast('Error restocking', 'error');
+            }
+        });
+        
+        // Train ML model
+        async function trainModel(productId) {
+            try {
+                const response = await fetch(`${API_URL}/products/${productId}/train`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showToast(`✅ Model trained! Accuracy: ${(data.accuracy * 100).toFixed(1)}%`, 'success');
+                    await loadDashboard();
+                    await loadProducts();
+                } else {
+                    showToast(data.error || 'Error training model', 'error');
+                }
+            } catch (error) {
+                console.error('Error training model:', error);
+                showToast('Error training model. Need at least 3 sales records.', 'error');
+            }
+        }
+        
+        // Predict stock
+        async function predictStock(productId) {
+            const modal = document.getElementById('predictionModal');
+            const resultDiv = document.getElementById('predictionResult');
+            modal.style.display = 'flex';
+            resultDiv.innerHTML = '<div class="loading">🔮 Generating prediction...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/products/${productId}/predict?days=7`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const stockAfter = data.stock_after_period || 0;
+                    const confidence = data.confidence || 'Low';
+                    const confidenceEmoji = confidence === 'High' ? '🟢' : confidence === 'Medium' ? '🟡' : '🔴';
+                    
+                    resultDiv.innerHTML = `
+                        <div style="padding: 15px;">
+                            <h3 style="color: #333; margin-bottom: 15px;">📊 ${data.product_name}</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                                <div style="background: #f7fafc; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 12px; color: #666;">Current Stock</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #333;">${data.current_stock}</div>
+                                </div>
+                                <div style="background: #f7fafc; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 12px; color: #666;">Predicted Need (7 days)</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #e53e3e;">${data.predicted_need}</div>
+                                </div>
+                                <div style="background: #f7fafc; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 12px; color: #666;">Stock After Period</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: ${stockAfter > 0 ? '#48bb78' : '#e53e3e'};">${stockAfter}</div>
+                                </div>
+                                <div style="background: #f7fafc; padding: 12px; border-radius: 8px;">
+                                    <div style="font-size: 12px; color: #666;">Daily Average</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #4facfe;">${data.daily_average || 'N/A'}</div>
+                                </div>
+                            </div>
+                            <div style="background: ${data.needs_reorder ? '#fed7d7' : '#c6f6d5'}; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                                <div style="font-weight: bold; font-size: 18px; text-align: center;">
+                                    ${data.recommendation || ''}
+                                </div>
+                                <div style="text-align: center; font-size: 14px; color: #4a5568;">
+                                    Confidence: ${confidenceEmoji} ${confidence}
+                                </div>
+                            </div>
+                            ${data.daily_predictions ? `
+                                <div style="margin-top: 10px;">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Daily Predictions:</div>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                        ${data.daily_predictions.map((p, i) => 
+                                            `<span style="background: #edf2f7; padding: 4px 10px; border-radius: 4px; font-size: 12px;">Day ${i+1}: ${p}</span>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="padding: 20px; text-align: center; color: #e53e3e;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
+                            <div>${data.error || 'Error making prediction'}</div>
+                            <div style="font-size: 14px; color: #666; margin-top: 10px;">Train the model first with at least 3 sales records.</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error predicting stock:', error);
+                resultDiv.innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: #e53e3e;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
+                        <div>Error making prediction</div>
+                        <div style="font-size: 14px; color: #666; margin-top: 10px;">Check console for details.</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Record sale
+        async function recordSale() {
+            const productId = document.getElementById('saleProduct').value;
+            const quantity = parseInt(document.getElementById('saleQuantity').value);
+            const customerId = document.getElementById('customerId').value;
+            
+            if (!productId || !quantity || quantity <= 0) {
+                showToast('Please select a product and enter a valid quantity', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/sales`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        product_id: productId, 
+                        quantity_sold: quantity,
+                        customer_id: customerId || null
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showToast(`✅ Sale recorded: ${quantity} units`, 'success');
+                    document.getElementById('saleQuantity').value = '';
+                    document.getElementById('customerId').value = '';
+                    await loadProducts();
+                    await loadDashboard();
+                } else {
+                    const error = await response.json();
+                    showToast(error.error || 'Error recording sale', 'error');
+                }
+            } catch (error) {
+                console.error('Error recording sale:', error);
+                showToast('Error recording sale', 'error');
+            }
+        }
+        
+        // Delete product
+        async function deleteProduct(productId) {
+            if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/products/${productId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    await loadProducts();
+                    await loadDashboard();
+                    showToast('Product deleted successfully', 'info');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showToast('Error deleting product', 'error');
+            }
+        }
+        
+        // Modal functions
+        function openAddProductModal() {
+            document.getElementById('addProductModal').style.display = 'flex';
+        }
+        
+        function closeAddProductModal() {
+            document.getElementById('addProductModal').style.display = 'none';
+            document.getElementById('addProductForm').reset();
+        }
+        
+        function openRestockModal() {
+            document.getElementById('restockModal').style.display = 'flex';
+        }
+        
+        function closeRestockModal() {
+            document.getElementById('restockModal').style.display = 'none';
+            document.getElementById('restockForm').reset();
+        }
+        
+        function closePredictionModal() {
+            document.getElementById('predictionModal').style.display = 'none';
+        }
+        
+        function refreshData() {
+            loadProducts();
+            loadDashboard();
+            showToast('🔄 Data refreshed', 'info');
+        }
+        
+        // Close modals on outside click
+        window.onclick = function(event) {
+            const modals = ['addProductModal', 'restockModal', 'predictionModal'];
+            modals.forEach(id => {
+                const modal = document.getElementById(id);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+        
+        // Initial load
+        loadProducts();
+        loadDashboard();
+        
+        // Refresh every 30 seconds
+        setInterval(() => {
+            loadProducts();
+            loadDashboard();
+        }, 30000);
+    </script>
+</body>
+</html>
