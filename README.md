@@ -2,6 +2,8 @@
 
 An intelligent inventory management system powered by machine learning that helps businesses optimize stock levels, predict demand, and prevent stockouts or overstocking.
 
+Website url: inventorymanagement-blush.vercel.app
+
 ## 🚀 Features
 
 - **AI-Powered Predictions**: Uses Linear Regression to forecast stock needs for up to 30 days
