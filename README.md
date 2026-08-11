@@ -230,10 +230,6 @@ python test_data.py
 - Update README for new features
 - Write unit tests for critical functionality
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🙏 Acknowledgments
 
 - Flask for the web framework
@@ -241,18 +237,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - SQLAlchemy for ORM
 - All contributors and users
 
-## 🆘 Support
-
-For issues and questions:
-- Open an issue on GitHub
-- Check the [API Documentation](API.md) for detailed endpoints
-- Review the [Troubleshooting Guide](TROUBLESHOOTING.md)
-
 ## 📚 Additional Resources
 
 - [Flask Documentation](https://flask.palletsprojects.com/)
 - [Scikit-learn Linear Regression](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)
 - [SQLAlchemy ORM](https://www.sqlalchemy.org/)
 
----
 
